@@ -1,5 +1,5 @@
 name:                conf-json
-version:             1.1
+version:             1.2
 synopsis:            read, parse json config
 description:         read, parse json config to a Haskell type
 author:              Imants Cekusins
@@ -60,6 +60,7 @@ test-suite spec
 
   main-is: Main.hs
   other-modules:
+          Data.Conf.Json
           Test.TestParse
 
   build-depends:  base >= 4.8,
