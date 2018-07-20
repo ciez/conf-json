@@ -16,6 +16,7 @@ instance FromJSON TestProp
 module Data.Conf.Json
         (readParse) where
 
+import Control.Monad
 import Data.Aeson as A
 import Data.ByteString as B
 import Data.ByteString.Lazy as L
@@ -28,19 +29,15 @@ readParse::FromJSON conf =>
      FilePath -> IO (Either String conf)
 readParse fullPath0 = do
      tbs1 <- readEntireFile fullPath0::IO (Either String B.ByteString)
-     pure $ tbs1 >>= 
-            Right . toLazy >>=
-            eitherDecode'   --  ::Either String Config
+     pure $ toLazy <$> tbs1 >>=
+         eitherDecode'   --  ::Either String Config
+     where toLazy::B.ByteString -> L.ByteString
+           toLazy bs0 = L.fromChunks [bs0]
 
 
 readEntireFile::FilePath -> IO (Either String B.ByteString)
 readEntireFile path0 = do
     exists1 <- doesFileExist path0
-    if exists1 then do
-        a1 <- withBinaryFile path0 ReadMode B.hGetContents
-        pure $ Right a1
+    if exists1 then liftM Right $
+        withBinaryFile path0 ReadMode B.hGetContents
     else pure $ Left $ "file n/a: " ++ path0
-
-
-toLazy::B.ByteString -> L.ByteString
-toLazy bs0 = L.fromChunks [bs0]
